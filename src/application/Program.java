@@ -2,9 +2,11 @@ package application;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 import model.entities.Reservation;
+import model.exceptions.DomainException;
 
 public class Program {
 
@@ -12,20 +14,17 @@ public class Program {
 		Scanner sc = new Scanner(System.in);
 		DateTimeFormatter formato  = DateTimeFormatter.ofPattern("dd/MM/yyyy"); //para formatar a data de entrada
 		
-		
-		System.out.print("Room number: ");
-		int number = sc.nextInt();
-		System.out.print("Check-in date (dd/MM/yyyy): ");
-		LocalDate checkIn = LocalDate.parse(sc.next(), formato);
-		System.out.print("Check-in date (dd/MM/yyyy): ");
-		LocalDate checkOut = LocalDate.parse(sc.next(), formato);
-		
-		if(!checkOut.isAfter(checkIn)) { 
-			System.out.println("Error in reservation: Check-out date must be after check-in date");
-		} 
-		else { 
+		try {
+			System.out.print("Room number: ");
+			int number = sc.nextInt();
+			System.out.print("Check-in date (dd/MM/yyyy): ");
+			LocalDate checkIn = LocalDate.parse(sc.next(), formato);
+			System.out.print("Check-in date (dd/MM/yyyy): ");
+			LocalDate checkOut = LocalDate.parse(sc.next(), formato);
+			
 			Reservation reservation = new Reservation(number, checkIn, checkOut); 
 			System.out.println("Reservation: " + reservation);
+			
 			System.out.println();
 			System.out.println("Enter data to update the reservation: ");
 			System.out.print("Check-in date (dd/MM/yyyy): "); 
@@ -33,50 +32,24 @@ public class Program {
 			System.out.print("Check-in date (dd/MM/yyyy): "); 
 			checkOut = LocalDate.parse(sc.next(), formato);
 			
-			String error = reservation.updateDates(checkIn, checkOut);
-			if(error != null) {
-				System.out.println("Error in reservation: " + error);
-			}
-			else {
-				System.out.println("Reservation: " + reservation);
-			}
+			reservation.updateDates(checkIn, checkOut);
+			System.out.println("Reservation: " + reservation);
+		}
+		catch (DateTimeParseException e) {
+			System.out.println("Invalid date format");
+		}
+		catch (DomainException e) {
+			System.out.println("Error in reservation: " + e.getMessage());
+		}
+		catch (RuntimeException e) {
+			System.out.println("Unexpected error");
 		}
 		
-		
-		//SOLUÇÃO MUITO RUIM
-		/*
-		 * if(!checkOut.isAfter(checkIn)) { System.out.
-		 * println("Error in reservation: Check-out date must be after check-in date");
-		 * } else { Reservation reservation = new Reservation(number, checkIn,
-		 * checkOut); System.out.println("Reservation: " + reservation);
-		 * 
-		 * System.out.println();
-		 * System.out.println("Enter data to update the reservation: ");
-		 * System.out.print("Check-in date (dd/MM/yyyy): "); checkIn =
-		 * LocalDate.parse(sc.next(), formato);
-		 * System.out.print("Check-in date (dd/MM/yyyy): "); checkOut =
-		 * LocalDate.parse(sc.next(), formato);
-		 * 
-		 * LocalDate hoje = LocalDate.now(); if(checkIn.isBefore(hoje) ||
-		 * checkOut.isBefore(hoje)) { System.out.
-		 * println("Error in reservation: Reservation dates for update must be future dates"
-		 * ); } else if(!checkOut.isAfter(checkIn)) { System.out.
-		 * println("Error in reservation: Check-out date must be after check-in date");
-		 * } else { reservation.updateDates(checkIn, checkOut);
-		 * System.out.println("Reservation: " + reservation); }
-		 * 
-		 * }
+		/*UTILIZANDO UMA CLASSE DE EXCEÇÃO JÁ EXISTENTE
+		 * catch (IllegalArgumentException e) {
+		 * System.out.println("Error in reservation: " + e.getMessage()); }
 		 */
 		
-		/*TESTE DO MÉTODO DURATION
-		 * int num = 1001; LocalDate checkIn = LocalDate.of(2020, 5, 29); LocalDate
-		 * checkOut = LocalDate.of(2020, 6, 04);
-		 * 
-		 * Reservation reservation = new Reservation(num, checkIn, checkOut);
-		 * 
-		 * System.out.println("Reservation: " + reservation);
-		 */
-		 
 		sc.close();
 
 	}
